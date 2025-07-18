@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class front {
-    @GetMapping("/")
+    @GetMapping("/")//Register and in this account and also a login controller-> forgot pass and else
     @ResponseBody
     public String home() {
         return "Welcome to the LMS Application!";
