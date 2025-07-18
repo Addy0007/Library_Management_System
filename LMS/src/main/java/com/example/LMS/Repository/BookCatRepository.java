@@ -7,13 +7,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface BookCatRepository extends JpaRepository<BookCat,Long> {
+public interface BookCatRepository extends JpaRepository<BookCat,BookCatId>{
     List<BookCat> findByBook_BookId(Long bookId);
 
     List<BookCat> findByCategory_CatId(Long catId);
-
-    boolean existsById(BookCatId id);
-
     void deleteByBook_BookId(Long bookId);
 
     void deleteByCategory_CatId(Long catId);
