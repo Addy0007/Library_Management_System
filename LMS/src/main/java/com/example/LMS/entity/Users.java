@@ -13,11 +13,13 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    private String Name;
-    private String Email;
-    private String Phone;
-    private String Password;
+    private String name;
+    private String email;
+    private String phone;
+    private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    private LocalDateTime Registration_Date;
-}
+    private LocalDateTime registrationDate;
+
+    }
+
