@@ -16,13 +16,14 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
 
     boolean existsByEmail(String email);
 
-    Optional<Users> findByPhone(String phone);
+    Optional<Users> findByPhone(Long phone);
 
-    boolean existsByPhone(String phone);
+    boolean existsByPhone(Long phone);
     Optional<Users> findByEmailAndPassword(String email, String password);
 
     List<Users> findByRole(Role role);
     List<Users> findByRegistrationDateAfter(LocalDateTime date);
     List<Users> findByNameContainingIgnoreCase(String name);
+    List<Users> findByBorrowedBooks_BookId(Long bookId);
 
 }

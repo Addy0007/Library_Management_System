@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+//DTO in this controller
+
 @RestController
 @RequestMapping("/api/auth")
 public class LoginController {
