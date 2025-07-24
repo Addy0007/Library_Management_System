@@ -1,19 +1,20 @@
 package com.example.LMS.Service;
 
-import com.example.LMS.entity.Book;
+import com.example.LMS.dto.BookDTO;
+
 import java.util.List;
 
 public interface BookService {
 
-    Book saveBook(Book book);
-    List<Book> getAllBooks();
-    Book getBookById(Long id);
+    BookDTO saveBook(BookDTO bookDTO);
+    List<BookDTO> getAllBooks();
+    BookDTO getBookById(Long id);
     void deleteBookById(Long id);
-    Book updateBookById(Long id, Book updatedBook);
-    Book updateBookTitle(Long id, String newTitle);
-    Book updateAvailableBooks(Long id, Integer availableCount);
-    Book updateTotalBooks(Long id, Integer totalCount);
-    Book updatePublisherName(Long id, String newPublisherName);
-    List<Book> getBooksByTitleContaining(String title);
-    List<Book> getBooksByPublisherName(String publisherName);
+    BookDTO updateBookById(Long id, BookDTO updatedBookDTO);
+    BookDTO updateBookTitle(Long id, String newTitle);
+    BookDTO updateAvailableBooks(Long id, Integer availableCount);
+    BookDTO updateTotalBooks(Long id, Integer totalCount);
+    BookDTO updatePublisherName(Long id, String newPublisherName);
+    List<BookDTO> getBooksByTitleContaining(String title);
+    List<BookDTO> getBooksByPublisherName(String publisherName);
 }

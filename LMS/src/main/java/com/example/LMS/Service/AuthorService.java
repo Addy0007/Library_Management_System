@@ -1,13 +1,13 @@
 package com.example.LMS.Service;
 
-import com.example.LMS.entity.Author;
+import com.example.LMS.dto.AuthorDTO;
 
 import java.util.List;
 
 public interface AuthorService {
-    Author saveAuthor(Author author);
-    List<Author> getAllAuthors();
-    Author getAuthorById(Long id);
-    Void deleteAuthorById(Long id);
-    Author updateAuthor(Long id, Author updatedAuthor);
+    AuthorDTO saveAuthor(AuthorDTO authorDTO);
+    List<AuthorDTO> getAllAuthors();
+    AuthorDTO getAuthorById(Long id);
+    void deleteAuthorById(Long id);
+    AuthorDTO updateAuthor(Long id, AuthorDTO updatedAuthorDTO);
 }

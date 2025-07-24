@@ -1,20 +1,22 @@
 package com.example.LMS.Service;
 
-import com.example.LMS.entity.Users;
+import com.example.LMS.dto.UsersDTO;
+import com.example.LMS.entity.Role;
 
 import java.util.List;
 
 public interface UsersService {
-    Users saveUsers(Users users);
-    List<Users> getAllUsers();
-    Users getUsersById(Long id);
-    void deleteUsersById(Long id);
-    Users updateUsersById(Long id, Users updatedUsers);
-    Users getUsersByEmail(String email);
-    Users getUsersByName(String name);
-    Users getUsersByPhone(Long phone);
-    Users updateUserName(Long id, String newName);
-    Users updateUserEmail(Long id, String newEmail);
-    Users updateUserPhone(Long id, Long newPhone);
-    Users updateUserPassword(Long id, String newPassword);
+    UsersDTO saveUsers(UsersDTO usersDTO);
+    List<UsersDTO> getAllUsers();
+    UsersDTO getUserById(Long id);
+    void deleteUserById(Long id);
+    UsersDTO updateUserById(Long id, UsersDTO updatedUsersDTO);
+    UsersDTO getUserByEmail(String email);
+    List<UsersDTO> getUsersByName(String name); // plural, returns List
+    UsersDTO getUserByPhone(Long phone);
+    UsersDTO updateUserName(Long id, String newName);
+    UsersDTO updateUserEmail(Long id, String newEmail);
+    UsersDTO updateUserPhone(Long id, Long newPhone);
+    UsersDTO updateUserPassword(Long id, String newPassword);
+    List<UsersDTO> getUsersByRole(Role role);
 }
