@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -23,5 +24,6 @@ public class Publisher {
 
     @OneToMany(mappedBy = "publisher")
     private List<Book> publishedBooks = new ArrayList<>();
+
 }
 

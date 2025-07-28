@@ -1,6 +1,7 @@
 package com.example.LMS.Service;
 
 import com.example.LMS.dto.AuthorDTO;
+import com.example.LMS.dto.BookDTO;
 
 import java.util.List;
 
@@ -10,4 +11,7 @@ public interface AuthorService {
     AuthorDTO getAuthorById(Long id);
     void deleteAuthorById(Long id);
     AuthorDTO updateAuthor(Long id, AuthorDTO updatedAuthorDTO);
+    List<BookDTO> getBooksByAuthorId(Long authorId);
+    List<BookDTO> getBooksByAuthorName(String name);
+
 }

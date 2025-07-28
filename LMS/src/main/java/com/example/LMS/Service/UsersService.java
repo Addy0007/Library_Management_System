@@ -1,5 +1,6 @@
 package com.example.LMS.Service;
 
+import com.example.LMS.dto.BookDTO;
 import com.example.LMS.dto.UsersDTO;
 import com.example.LMS.entity.Role;
 
@@ -19,4 +20,7 @@ public interface UsersService {
     UsersDTO updateUserPhone(Long id, Long newPhone);
     UsersDTO updateUserPassword(Long id, String newPassword);
     List<UsersDTO> getUsersByRole(Role role);
+    List<BookDTO> getBorrowedBooksByUserId(Long userId);
+    List<BookDTO> getBorrowedBooksByUserName(String name);
+
 }

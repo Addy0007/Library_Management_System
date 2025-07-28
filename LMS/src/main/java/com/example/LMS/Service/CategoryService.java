@@ -1,5 +1,6 @@
 package com.example.LMS.Service;
 
+import com.example.LMS.dto.BookDTO;
 import com.example.LMS.dto.CategoryDTO;
 
 
@@ -10,6 +11,10 @@ public interface CategoryService {
     List<CategoryDTO> getAllCategories();
     CategoryDTO getCategoryById(Long id);
     void deleteCategoryById(Long id);
-    CategoryDTO updateCategoryById(Long id,CategoryDTO updatedCategoryDTO);
+
+    List<BookDTO> getBooksByCategoryId(Long categoryId);
+    List<BookDTO> getBooksByCategoryName(String name);
+
+    CategoryDTO updateCategoryById(Long id, CategoryDTO updatedCategoryDTO);
 }
 

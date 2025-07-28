@@ -25,5 +25,7 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     List<Users> findByRegistrationDateAfter(LocalDateTime date);
     List<Users> findByNameContainingIgnoreCase(String name);
     List<Users> findByBorrowedBooks_BookId(Long bookId);
-
+    List<Users> findByNameIgnoreCase(String name);
+    List<Users> findByBorrowedBooks_TitleIgnoreCase(String title);
+    List<Users> findByBorrowedBooks_TitleContainingIgnoreCase(String titlePart);
 }
