@@ -1,5 +1,6 @@
 package com.example.LMS.Service;
 
+import com.example.LMS.Configurations.SecurityBeansConfig;
 import com.example.LMS.Repository.UsersRepository;
 import com.example.LMS.dto.LoginDTO;
 import com.example.LMS.dto.LoginRequestDTO;
@@ -8,6 +9,7 @@ import com.example.LMS.dto.UserProfileDTO;
 import com.example.LMS.entity.Role;
 import com.example.LMS.entity.Users;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,10 +19,12 @@ import java.util.Optional;
 public class AuthorizationServiceImpl implements AuthorizationService {
 
     private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthorizationServiceImpl(UsersRepository usersRepository) {
+    public AuthorizationServiceImpl(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -33,8 +37,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         user.setName(registrationDTO.getName());
         user.setEmail(registrationDTO.getEmail());
         user.setPhone(registrationDTO.getPhone());
-        user.setPassword(registrationDTO.getPassword()); // bcrypt to be added later
-        user.setRole(Role.valueOf("STUDENT"));
+        user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
+
+        user.setRole(Role.STUDENT); // default role
         user.setRegistrationDate(LocalDateTime.now());
 
         Users savedUser = usersRepository.save(user);
@@ -43,31 +48,27 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         result.setName(savedUser.getName());
         result.setEmail(savedUser.getEmail());
         result.setPhone(savedUser.getPhone());
-        result.setPassword(null); // do not return password
+        result.setPassword(null); // never return password
 
         return result;
     }
 
+
     @Override
-    public LoginRequestDTO login(LoginDTO loginDTO) {
-        Optional<Users> userOpt = usersRepository.findByEmail(loginDTO.getEmail());
+    public LoginRequestDTO login(LoginDTO dto) {
+        Users user = usersRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new RuntimeException("Email not found"));
 
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("User not found.");
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Incorrect password");
         }
 
-        Users user = userOpt.get();
-
-        if (!user.getPassword().equals(loginDTO.getPassword())) {
-            throw new RuntimeException("Incorrect password.");
-        }
-
-        LoginRequestDTO loginResponse = new LoginRequestDTO();
-        loginResponse.setEmail(user.getEmail());
-        loginResponse.setPassword("Login successful!"); // repurposed, ideally not for message
-
-        return loginResponse;
+        LoginRequestDTO res = new LoginRequestDTO();
+        res.setEmail(user.getEmail());
+        res.setPassword(null); // or replace with JWT token later
+        return res;
     }
+
 
     @Override
     public boolean checkEmailExists(String email) {
@@ -85,7 +86,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                 return false;
             }
 
-            user.setPassword(newPassword);
+            user.setPassword(passwordEncoder.encode(newPassword));
             usersRepository.save(user);
             return true;
         }
@@ -104,7 +105,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
         if (userOpt.isPresent()) {
             Users user = userOpt.get();
-            user.setPassword(newPassword);
+            user.setPassword(passwordEncoder.encode(newPassword)); // ✅ Encrypt
             usersRepository.save(user);
             return true;
         }
@@ -131,18 +132,15 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
 
     @Override
-    public UserRegisterDTO getProfileByEmail(String email) {
-        Optional<Users> userOpt = usersRepository.findByEmail(email);
-        if (userOpt.isEmpty()) return null;
+    public UserProfileDTO getProfileByEmail(String email) {
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Users user = userOpt.get();
-
-        UserRegisterDTO dto = new UserRegisterDTO();
-        dto.setName(user.getName());
-        dto.setEmail(user.getEmail());
-        dto.setPhone(user.getPhone());
-        dto.setPassword(null);
-
-        return dto;
+        return new UserProfileDTO(
+                user.getName(),
+                user.getEmail(),
+                user.getRole().name()
+        );
     }
+
 }

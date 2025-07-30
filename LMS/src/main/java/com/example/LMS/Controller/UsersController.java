@@ -4,20 +4,19 @@ import com.example.LMS.Service.UsersService;
 import com.example.LMS.dto.BookDTO;
 import com.example.LMS.dto.UsersDTO;
 import com.example.LMS.entity.Role;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/users")
 public class UsersController {
 
-    @Autowired
-    private UsersService usersService;
+
+    private final UsersService usersService;
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")

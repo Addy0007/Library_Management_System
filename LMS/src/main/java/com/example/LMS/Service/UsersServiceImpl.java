@@ -11,6 +11,7 @@ import com.example.LMS.entity.Users;
 import com.example.LMS.mapper.BookMapper;
 import com.example.LMS.mapper.UsersMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class UsersServiceImpl implements UsersService {
 
     private final UsersRepository usersRepository;
     private final BookRepository bookRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UsersDTO saveUsers(UsersDTO usersDTO) {
@@ -82,8 +84,9 @@ public class UsersServiceImpl implements UsersService {
                 user.setPhone(patchDTO.getPhone());
             }
             if (patchDTO.getPassword() != null) {
-                user.setPassword(patchDTO.getPassword()); // NOTE: encode if needed
+                user.setPassword(passwordEncoder.encode(patchDTO.getPassword())); // ✅ encrypted
             }
+
             return UsersMapper.toDTO(usersRepository.save(user));
         }).orElse(null);
     }

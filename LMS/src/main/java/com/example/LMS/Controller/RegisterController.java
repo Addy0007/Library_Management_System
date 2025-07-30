@@ -3,18 +3,20 @@ package com.example.LMS.Controller;
 import com.example.LMS.Repository.UsersRepository;
 import com.example.LMS.dto.UserRegisterDTO;
 import com.example.LMS.entity.Users;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
 public class RegisterController {
 
-    @Autowired
-    private UsersRepository usersRepository;
+
+    private final UsersRepository usersRepository;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody UserRegisterDTO dto) {

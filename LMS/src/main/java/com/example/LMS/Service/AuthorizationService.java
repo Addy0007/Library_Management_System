@@ -2,6 +2,7 @@ package com.example.LMS.Service;
 
 import com.example.LMS.dto.LoginDTO;
 import com.example.LMS.dto.LoginRequestDTO;
+import com.example.LMS.dto.UserProfileDTO;
 import com.example.LMS.dto.UserRegisterDTO;
 import com.example.LMS.entity.Role;
 
@@ -15,5 +16,5 @@ public interface AuthorizationService {
     boolean resetPassword(String email, String newPassword, String token);
     Role getUserRole(String email);
     boolean deleteUserByEmail(String email);
-    UserRegisterDTO getProfileByEmail(String email);
+    UserProfileDTO getProfileByEmail(String email);
 }

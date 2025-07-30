@@ -3,18 +3,21 @@ package com.example.LMS.Controller;
 import com.example.LMS.Repository.UsersRepository;
 import com.example.LMS.dto.LoginRequestDTO;
 import com.example.LMS.entity.Users;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
 public class LoginController {
 
-    @Autowired
-    private UsersRepository usersRepository;
+
+    private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequestDTO loginRequest) {
@@ -28,7 +31,7 @@ public class LoginController {
 
         Users user = userOpt.get();
 
-        if (!user.getPassword().equals(loginRequest.getPassword())) {
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             return ResponseEntity
                     .badRequest()
                     .body("Incorrect password. Forgot password? Visit: /api/auth/forgot-password");
