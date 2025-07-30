@@ -1,16 +1,13 @@
 package com.example.LMS.Controller;
 
 import com.example.LMS.Repository.UsersRepository;
+import com.example.LMS.dto.LoginRequestDTO;
 import com.example.LMS.entity.Users;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
-
-//DTO in this controller
 
 @RestController
 @RequestMapping("/api/auth")
@@ -19,26 +16,19 @@ public class LoginController {
     @Autowired
     private UsersRepository usersRepository;
 
-    @Getter
-    @Setter
-    public static class LoginRequest {
-        private String email;
-        private String password;
-    }
-
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
-        Optional<Users> existingUserOpt = usersRepository.findByEmail(loginRequest.getEmail());
+    public ResponseEntity<String> login(@RequestBody LoginRequestDTO loginRequest) {
+        Optional<Users> userOpt = usersRepository.findByEmail(loginRequest.getEmail());
 
-        if (existingUserOpt.isEmpty()) {
+        if (userOpt.isEmpty()) {
             return ResponseEntity
                     .badRequest()
                     .body("No user found with this email. Not a user? Visit: /api/auth/register");
         }
 
-        Users existingUser = existingUserOpt.get();
+        Users user = userOpt.get();
 
-        if (!existingUser.getPassword().equals(loginRequest.getPassword())) {
+        if (!user.getPassword().equals(loginRequest.getPassword())) {
             return ResponseEntity
                     .badRequest()
                     .body("Incorrect password. Forgot password? Visit: /api/auth/forgot-password");

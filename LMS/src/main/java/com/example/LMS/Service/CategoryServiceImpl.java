@@ -3,11 +3,14 @@ package com.example.LMS.Service;
 import com.example.LMS.Repository.CategoryRepository;
 import com.example.LMS.dto.BookDTO;
 import com.example.LMS.dto.CategoryDTO;
+import com.example.LMS.dto.PatchDTO.CategoryPatchDTO;
 import com.example.LMS.entity.Category;
 import com.example.LMS.mapper.BookMapper;
+import com.example.LMS.mapper.CategoryMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,12 +79,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO updateCategoryById(Long id, CategoryDTO updatedCategoryDTO) {
-        return categoryRepository.findById(id)
-                .map(existing -> {
-                    existing.setName(updatedCategoryDTO.getName());
-                    Category updated = categoryRepository.save(existing);
-                    return convertToDTO(updated);
-                })
-                .orElse(null);
+        Optional<Category> optionalCategory = categoryRepository.findById(id);
+        if (optionalCategory.isPresent()) {
+            Category existing = optionalCategory.get();
+            existing.setName(updatedCategoryDTO.getName());
+            Category updated = categoryRepository.save(existing);
+            return CategoryMapper.toDTO(updated);
+        }
+        return null; // or throw custom exception
     }
+
 }

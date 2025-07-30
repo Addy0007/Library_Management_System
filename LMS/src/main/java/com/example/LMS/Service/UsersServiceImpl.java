@@ -4,6 +4,7 @@ import com.example.LMS.Repository.BookRepository;
 import com.example.LMS.Repository.UsersRepository;
 import com.example.LMS.dto.BookDTO;
 import com.example.LMS.dto.UsersDTO;
+import com.example.LMS.dto.PatchDTO.UsersPatchDTO;
 import com.example.LMS.entity.Book;
 import com.example.LMS.entity.Role;
 import com.example.LMS.entity.Users;
@@ -69,6 +70,25 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
+    public UsersDTO updateUserPartial(Long id, UsersPatchDTO patchDTO) {
+        return usersRepository.findById(id).map(user -> {
+            if (patchDTO.getName() != null) {
+                user.setName(patchDTO.getName());
+            }
+            if (patchDTO.getEmail() != null) {
+                user.setEmail(patchDTO.getEmail());
+            }
+            if (patchDTO.getPhone() != null) {
+                user.setPhone(patchDTO.getPhone());
+            }
+            if (patchDTO.getPassword() != null) {
+                user.setPassword(patchDTO.getPassword()); // NOTE: encode if needed
+            }
+            return UsersMapper.toDTO(usersRepository.save(user));
+        }).orElse(null);
+    }
+
+    @Override
     public UsersDTO getUserByEmail(String email) {
         return usersRepository.findByEmail(email)
                 .map(UsersMapper::toDTO)
@@ -87,38 +107,6 @@ public class UsersServiceImpl implements UsersService {
         return usersRepository.findByPhone(phone)
                 .map(UsersMapper::toDTO)
                 .orElse(null);
-    }
-
-    @Override
-    public UsersDTO updateUserName(Long id, String newName) {
-        return usersRepository.findById(id).map(user -> {
-            user.setName(newName);
-            return UsersMapper.toDTO(usersRepository.save(user));
-        }).orElse(null);
-    }
-
-    @Override
-    public UsersDTO updateUserEmail(Long id, String newEmail) {
-        return usersRepository.findById(id).map(user -> {
-            user.setEmail(newEmail);
-            return UsersMapper.toDTO(usersRepository.save(user));
-        }).orElse(null);
-    }
-
-    @Override
-    public UsersDTO updateUserPhone(Long id, Long newPhone) {
-        return usersRepository.findById(id).map(user -> {
-            user.setPhone(newPhone);
-            return UsersMapper.toDTO(usersRepository.save(user));
-        }).orElse(null);
-    }
-
-    @Override
-    public UsersDTO updateUserPassword(Long id, String newPassword) {
-        return usersRepository.findById(id).map(user -> {
-            user.setPassword(newPassword); // In production, hash this!
-            return UsersMapper.toDTO(usersRepository.save(user));
-        }).orElse(null);
     }
 
     @Override

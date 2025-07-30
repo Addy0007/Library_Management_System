@@ -4,6 +4,7 @@ import com.example.LMS.Repository.AuthorRepository;
 import com.example.LMS.Repository.BookRepository;
 import com.example.LMS.dto.AuthorDTO;
 import com.example.LMS.dto.BookDTO;
+import com.example.LMS.dto.PatchDTO.AuthorPatchDTO;
 import com.example.LMS.entity.Author;
 import com.example.LMS.mapper.AuthorMapper;
 import com.example.LMS.mapper.BookMapper;
@@ -81,4 +82,5 @@ public class AuthorServiceImpl implements AuthorService {
                 .map(BookMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
 }

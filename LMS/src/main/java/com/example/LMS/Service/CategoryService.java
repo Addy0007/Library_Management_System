@@ -2,6 +2,7 @@ package com.example.LMS.Service;
 
 import com.example.LMS.dto.BookDTO;
 import com.example.LMS.dto.CategoryDTO;
+import com.example.LMS.dto.PatchDTO.CategoryPatchDTO;
 
 
 import java.util.List;
@@ -14,7 +15,6 @@ public interface CategoryService {
 
     List<BookDTO> getBooksByCategoryId(Long categoryId);
     List<BookDTO> getBooksByCategoryName(String name);
-
     CategoryDTO updateCategoryById(Long id, CategoryDTO updatedCategoryDTO);
 }
 

@@ -2,6 +2,7 @@ package com.example.LMS.Service;
 
 import com.example.LMS.Repository.*;
 import com.example.LMS.dto.BookDTO;
+import com.example.LMS.dto.PatchDTO.BookPatchDTO;
 import com.example.LMS.entity.*;
 import com.example.LMS.mapper.BookMapper;
 import org.springframework.stereotype.Service;
@@ -33,21 +34,21 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO saveBook(BookDTO bookDTO) {
-        Publisher publisher = bookDTO.getPublisherId() != null
-                ? publisherRepository.findById(bookDTO.getPublisherId()).orElse(null)
-                : null;
+        Publisher publisher = Optional.ofNullable(bookDTO.getPublisherId())
+                .flatMap(publisherRepository::findById)
+                .orElse(null);
 
-        List<Author> authors = bookDTO.getAuthorIds() != null
-                ? authorRepository.findAllById(bookDTO.getAuthorIds())
-                : List.of();
+        List<Author> authors = Optional.ofNullable(bookDTO.getAuthorIds())
+                .map(authorRepository::findAllById)
+                .orElse(List.of());
 
-        List<Category> categories = bookDTO.getCategoryIds() != null
-                ? categoryRepository.findAllById(bookDTO.getCategoryIds())
-                : List.of();
+        List<Category> categories = Optional.ofNullable(bookDTO.getCategoryIds())
+                .map(categoryRepository::findAllById)
+                .orElse(List.of());
 
-        List<Users> borrowers = bookDTO.getBorrowerIds() != null
-                ? usersRepository.findAllById(bookDTO.getBorrowerIds())
-                : List.of();
+        List<Users> borrowers = Optional.ofNullable(bookDTO.getBorrowerIds())
+                .map(usersRepository::findAllById)
+                .orElse(List.of());
 
         Book book = BookMapper.toEntity(bookDTO, publisher, authors, categories, borrowers);
         return BookMapper.toDTO(bookRepository.save(book));
@@ -73,77 +74,6 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDTO updateBookById(Long id, BookDTO updatedBookDTO) {
-        Optional<Book> existingBookOpt = bookRepository.findById(id);
-        if (existingBookOpt.isEmpty()) return null;
-
-        Publisher publisher = updatedBookDTO.getPublisherId() != null
-                ? publisherRepository.findById(updatedBookDTO.getPublisherId()).orElse(null)
-                : null;
-
-        List<Author> authors = updatedBookDTO.getAuthorIds() != null
-                ? authorRepository.findAllById(updatedBookDTO.getAuthorIds())
-                : List.of();
-
-        List<Category> categories = updatedBookDTO.getCategoryIds() != null
-                ? categoryRepository.findAllById(updatedBookDTO.getCategoryIds())
-                : List.of();
-
-        List<Users> borrowers = updatedBookDTO.getBorrowerIds() != null
-                ? usersRepository.findAllById(updatedBookDTO.getBorrowerIds())
-                : List.of();
-
-        Book updatedBook = BookMapper.toEntity(updatedBookDTO, publisher, authors, categories, borrowers);
-        updatedBook.setBookId(id);
-        return BookMapper.toDTO(bookRepository.save(updatedBook));
-    }
-
-    @Override
-    public BookDTO updateBookTitle(Long id, String newTitle) {
-        Optional<Book> bookOpt = bookRepository.findById(id);
-        if (bookOpt.isEmpty()) return null;
-
-        Book book = bookOpt.get();
-        book.setTitle(newTitle);
-        return BookMapper.toDTO(bookRepository.save(book));
-    }
-
-    @Override
-    public BookDTO updateAvailableBooks(Long id, Integer availableCount) {
-        Optional<Book> bookOpt = bookRepository.findById(id);
-        if (bookOpt.isEmpty()) return null;
-
-        Book book = bookOpt.get();
-        book.setAvailableBooks(availableCount);
-        return BookMapper.toDTO(bookRepository.save(book));
-    }
-
-    @Override
-    public BookDTO updateTotalBooks(Long id, Integer totalCount) {
-        Optional<Book> bookOpt = bookRepository.findById(id);
-        if (bookOpt.isEmpty()) return null;
-
-        Book book = bookOpt.get();
-        book.setTotalBooks(totalCount);
-        return BookMapper.toDTO(bookRepository.save(book));
-    }
-
-    @Override
-    public BookDTO updatePublisherName(Long id, String newPublisherName) {
-        Optional<Book> bookOpt = bookRepository.findById(id);
-        if (bookOpt.isEmpty()) return null;
-
-        Book book = bookOpt.get();
-        Publisher newPublisher = publisherRepository.findByNameIgnoreCase(newPublisherName)
-                .stream().findFirst().orElse(null);
-
-        if (newPublisher == null) return null;
-
-        book.setPublisher(newPublisher);
-        return BookMapper.toDTO(bookRepository.save(book));
-    }
-
-    @Override
     public List<BookDTO> getBooksByTitleContaining(String title) {
         return bookRepository.findByTitleContainingIgnoreCase(title).stream()
                 .map(BookMapper::toDTO)
@@ -156,5 +86,33 @@ public class BookServiceImpl implements BookService {
                 .flatMap(pub -> pub.getPublishedBooks().stream())
                 .map(BookMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public BookDTO updateBookPartial(Long bookId, BookPatchDTO patchDTO) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        if (patchDTO.getTitle() != null) book.setTitle(patchDTO.getTitle());
+        if (patchDTO.getPublisherName() != null) book.setPublisherName(patchDTO.getPublisherName());
+        if (patchDTO.getTotalBooks() != null) book.setTotalBooks(patchDTO.getTotalBooks());
+        if (patchDTO.getAvailableBooks() != null) book.setAvailableBooks(patchDTO.getAvailableBooks());
+
+        Book updated = bookRepository.save(book);
+        return BookMapper.toDTO(updated);
+    }
+
+    @Override
+    public BookDTO updateBookById(Long id, BookDTO updatedBookDTO) {
+        Optional<Book> optionalBook = bookRepository.findById(id);
+        if (optionalBook.isPresent()) {
+            Book book = optionalBook.get();
+            book.setTitle(updatedBookDTO.getTitle());
+            book.setPublisherName(updatedBookDTO.getPublisherName());
+            book.setTotalBooks(updatedBookDTO.getTotalBooks());
+            book.setAvailableBooks(updatedBookDTO.getAvailableBooks());
+            return BookMapper.toDTO(bookRepository.save(book));
+        }
+        return null;
     }
 }

@@ -5,9 +5,11 @@ import com.example.LMS.dto.BookDTO;
 import com.example.LMS.dto.PublisherDTO;
 import com.example.LMS.entity.Publisher;
 import com.example.LMS.mapper.BookMapper;
+import com.example.LMS.mapper.PublisherMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,14 +60,16 @@ public class PublisherServiceImpl implements PublisherService {
 
     @Override
     public PublisherDTO updatePublisherById(Long id, PublisherDTO updatedPublisherDTO) {
-        return publisherRepository.findById(id)
-                .map(existing -> {
-                    existing.setName(updatedPublisherDTO.getName());
-                    Publisher updated = publisherRepository.save(existing);
-                    return convertToDTO(updated);
-                })
-                .orElse(null);
+        Optional<Publisher> optionalPublisher = publisherRepository.findById(id);
+        if (optionalPublisher.isPresent()) {
+            Publisher existing = optionalPublisher.get();
+            existing.setName(updatedPublisherDTO.getName());
+            Publisher updated = publisherRepository.save(existing);
+            return PublisherMapper.toDTO(updated);
+        }
+        return null; // or throw custom exception
     }
+
 
     @Override
     public List<BookDTO> getBooksByPublisherId(Long publisherId) {
