@@ -70,12 +70,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<BookDTO> getBooksByCategoryName(String name) {
-        Category category = categoryRepository.findByNameIgnoreCase(name);
-        if (category == null || category.getBooks() == null) return List.of();
-        return category.getBooks().stream()
-                .map(BookMapper::toDTO)
-                .collect(Collectors.toList());
+        return categoryRepository.findByNameIgnoreCase(name)
+                .map(category -> category.getBooks().stream()
+                        .map(BookMapper::toDTO)
+                        .collect(Collectors.toList()))
+                .orElse(List.of());
     }
+
 
     @Override
     public CategoryDTO updateCategoryById(Long id, CategoryDTO updatedCategoryDTO) {
@@ -86,7 +87,7 @@ public class CategoryServiceImpl implements CategoryService {
             Category updated = categoryRepository.save(existing);
             return CategoryMapper.toDTO(updated);
         }
-        return null; // or throw custom exception
+        return null;
     }
 
 }

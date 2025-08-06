@@ -34,25 +34,62 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO saveBook(BookDTO bookDTO) {
-        Publisher publisher = Optional.ofNullable(bookDTO.getPublisherId())
-                .flatMap(publisherRepository::findById)
-                .orElse(null);
 
-        List<Author> authors = Optional.ofNullable(bookDTO.getAuthorIds())
-                .map(authorRepository::findAllById)
-                .orElse(List.of());
 
-        List<Category> categories = Optional.ofNullable(bookDTO.getCategoryIds())
-                .map(categoryRepository::findAllById)
-                .orElse(List.of());
+        Publisher publisher = null;
+        if (bookDTO.getPublisherName() != null) {
+            publisher = publisherRepository.findByNameIgnoreCase(bookDTO.getPublisherName())
+                    .orElseGet(() -> {
+                        Publisher newPub = new Publisher();
+                        newPub.setName(bookDTO.getPublisherName());
+                        return publisherRepository.save(newPub); // 🆕 create if not found
+                    });
+        }
 
-        List<Users> borrowers = Optional.ofNullable(bookDTO.getBorrowerIds())
-                .map(usersRepository::findAllById)
-                .orElse(List.of());
+        List<Author> authors = Optional.ofNullable(bookDTO.getAuthorNames())
+                .orElse(List.of())
+                .stream()
+                .map(name -> authorRepository.findByNameIgnoreCase(name)
+                        .orElseGet(() -> {
+                            Author newAuthor = new Author();
+                            newAuthor.setName(name);
+                            return authorRepository.save(newAuthor); // 🆕 create
+                        }))
+                .collect(Collectors.toList());
+
+
+        List<Category> categories = Optional.ofNullable(bookDTO.getCategoryNames())
+                .orElse(List.of())
+                .stream()
+                .map(name -> categoryRepository.findByNameIgnoreCase(name)
+                        .orElseGet(() -> {
+                            Category newCat = new Category();
+                            newCat.setName(name);
+                            return categoryRepository.save(newCat);
+                        }))
+                .collect(Collectors.toList());
+
+
+        List<Users> borrowers = Optional.ofNullable(bookDTO.getBorrowerEmails())
+                .orElse(List.of())
+                .stream()
+                .map(email -> usersRepository.findByEmailIgnoreCase(email)
+                        .orElseThrow(() -> new RuntimeException("Borrower not found: " + email)))
+                .collect(Collectors.toList());
+
 
         Book book = BookMapper.toEntity(bookDTO, publisher, authors, categories, borrowers);
-        return BookMapper.toDTO(bookRepository.save(book));
+        Book savedBook = bookRepository.save(book);
+
+
+        for (Users user : borrowers) {
+            user.getBorrowedBooks().add(savedBook);
+            usersRepository.save(user);
+        }
+
+        return BookMapper.toDTO(savedBook);
     }
+
 
     @Override
     public List<BookDTO> getAllBooks() {
@@ -94,7 +131,6 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new RuntimeException("Book not found"));
 
         if (patchDTO.getTitle() != null) book.setTitle(patchDTO.getTitle());
-        if (patchDTO.getPublisherName() != null) book.setPublisherName(patchDTO.getPublisherName());
         if (patchDTO.getTotalBooks() != null) book.setTotalBooks(patchDTO.getTotalBooks());
         if (patchDTO.getAvailableBooks() != null) book.setAvailableBooks(patchDTO.getAvailableBooks());
 
@@ -108,7 +144,6 @@ public class BookServiceImpl implements BookService {
         if (optionalBook.isPresent()) {
             Book book = optionalBook.get();
             book.setTitle(updatedBookDTO.getTitle());
-            book.setPublisherName(updatedBookDTO.getPublisherName());
             book.setTotalBooks(updatedBookDTO.getTotalBooks());
             book.setAvailableBooks(updatedBookDTO.getAvailableBooks());
             return BookMapper.toDTO(bookRepository.save(book));

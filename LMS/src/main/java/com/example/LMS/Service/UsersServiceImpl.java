@@ -3,6 +3,7 @@ package com.example.LMS.Service;
 import com.example.LMS.Repository.BookRepository;
 import com.example.LMS.Repository.UsersRepository;
 import com.example.LMS.dto.BookDTO;
+import com.example.LMS.dto.CreateUserRequestDTO;
 import com.example.LMS.dto.UsersDTO;
 import com.example.LMS.dto.PatchDTO.UsersPatchDTO;
 import com.example.LMS.entity.Book;
@@ -11,15 +12,21 @@ import com.example.LMS.entity.Users;
 import com.example.LMS.mapper.BookMapper;
 import com.example.LMS.mapper.UsersMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UsersServiceImpl implements UsersService {
+public class UsersServiceImpl implements UsersService, UserDetailsService {
 
     private final UsersRepository usersRepository;
     private final BookRepository bookRepository;
@@ -135,4 +142,45 @@ public class UsersServiceImpl implements UsersService {
                 .map(BookMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
+    }
+
+    @Override
+    public UsersDTO createUser(CreateUserRequestDTO createUserRequest) {
+
+        if (usersRepository.findByEmail(createUserRequest.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
+        List<Book> borrowedBooks = createUserRequest.getBorrowedBookIds() != null
+                ? bookRepository.findAllById(createUserRequest.getBorrowedBookIds())
+                : List.of();
+
+
+        Users user = new Users();
+        user.setName(createUserRequest.getName());
+        user.setEmail(createUserRequest.getEmail());
+        user.setPhone(createUserRequest.getPhone());
+        user.setRole(createUserRequest.getRole());
+        user.setRegistrationDate(LocalDateTime.now());
+        user.setBorrowedBooks(borrowedBooks);
+
+
+        user.setPassword(passwordEncoder.encode(createUserRequest.getPassword()));
+
+        Users savedUser = usersRepository.save(user);
+        return UsersMapper.toDTO(savedUser);
+    }
+
 }

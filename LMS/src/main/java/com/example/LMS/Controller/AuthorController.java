@@ -7,11 +7,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/authors")
 public class AuthorController {
-
 
     private final AuthorService authorService;
 

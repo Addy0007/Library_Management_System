@@ -1,13 +1,16 @@
 package com.example.LMS.Service;
 
 import com.example.LMS.dto.BookDTO;
+import com.example.LMS.dto.CreateUserRequestDTO;
 import com.example.LMS.dto.UsersDTO;
 import com.example.LMS.dto.PatchDTO.UsersPatchDTO;
 import com.example.LMS.entity.Role;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
-public interface UsersService {
+public interface UsersService extends UserDetailsService {
 
     UsersDTO saveUsers(UsersDTO usersDTO);
 
@@ -32,4 +35,9 @@ public interface UsersService {
     List<BookDTO> getBorrowedBooksByUserId(Long userId);
 
     List<BookDTO> getBorrowedBooksByUserName(String name);
+
+    UserDetails loadUserByUsername(String username);
+
+    UsersDTO createUser(CreateUserRequestDTO createUserRequest);
 }
+

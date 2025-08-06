@@ -11,7 +11,7 @@ public class AuthorMapper {
 
     public static Author toEntity(AuthorDTO dto) {
         Author author = new Author();
-        author.setAuthId(dto.getAuthId());
+
         author.setName(dto.getName());
         return author;
     }

@@ -11,8 +11,8 @@ public class PublisherMapper {
 
     public static Publisher toEntity(PublisherDTO dto) {
         Publisher publisher = new Publisher();
-        publisher.setPublisherId(dto.getPublisherId());
         publisher.setName(dto.getName());
         return publisher;
     }
 }
+

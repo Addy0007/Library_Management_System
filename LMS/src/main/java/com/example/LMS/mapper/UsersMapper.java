@@ -27,7 +27,6 @@ public class UsersMapper {
 
     public static Users toEntity(UsersDTO dto, List<Book> borrowedBooks) {
         Users user = new Users();
-        user.setUserId(dto.getUserId());
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());

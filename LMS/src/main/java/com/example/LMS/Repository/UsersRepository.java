@@ -28,4 +28,5 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     List<Users> findByNameIgnoreCase(String name);
     List<Users> findByBorrowedBooks_TitleIgnoreCase(String title);
     List<Users> findByBorrowedBooks_TitleContainingIgnoreCase(String titlePart);
+    Optional<Users> findByEmailIgnoreCase(String email);
 }

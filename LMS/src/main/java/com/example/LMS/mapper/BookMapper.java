@@ -9,30 +9,31 @@ import java.util.stream.Collectors;
 public class BookMapper {
 
     public static BookDTO toDTO(Book book) {
-        List<Long> authorIds = book.getAuthors() != null
-                ? book.getAuthors().stream().map(Author::getAuthId).collect(Collectors.toList())
-                : null;
+        List<String> authorNames = book.getAuthors() != null
+                ? book.getAuthors().stream().map(Author::getName).collect(Collectors.toList())
+                : List.of();
 
-        List<Long> categoryIds = book.getCategories() != null
-                ? book.getCategories().stream().map(Category::getCatId).collect(Collectors.toList())
-                : null;
+        List<String> categoryNames = book.getCategories() != null
+                ? book.getCategories().stream().map(Category::getName).collect(Collectors.toList())
+                : List.of();
 
-        List<Long> borrowerIds = book.getBorrowers() != null
-                ? book.getBorrowers().stream().map(Users::getUserId).collect(Collectors.toList())
-                : null;
+        List<String> borrowerEmails = book.getBorrowers() != null
+                ? book.getBorrowers().stream().map(Users::getEmail).collect(Collectors.toList())
+                : List.of();
 
-        Long publisherId = book.getPublisher() != null ? book.getPublisher().getPublisherId() : null;
+        String publisherName = book.getPublisher() != null
+                ? book.getPublisher().getName()
+                : null;
 
         return new BookDTO(
                 book.getBookId(),
                 book.getTitle(),
-                book.getPublisher() != null ? book.getPublisher().getName() : null,
+                publisherName,
                 book.getTotalBooks(),
                 book.getAvailableBooks(),
-                authorIds,
-                categoryIds,
-                publisherId,
-                borrowerIds
+                authorNames,
+                categoryNames,
+                borrowerEmails
         );
     }
 
@@ -43,12 +44,10 @@ public class BookMapper {
                                 List<Users> borrowers) {
 
         Book book = new Book();
-        book.setBookId(dto.getBookId());
         book.setTitle(dto.getTitle());
         book.setPublisher(publisher);
         book.setTotalBooks(dto.getTotalBooks());
         book.setAvailableBooks(dto.getAvailableBooks());
-
         book.setAuthors(authors);
         book.setCategories(categories);
         book.setBorrowers(borrowers);

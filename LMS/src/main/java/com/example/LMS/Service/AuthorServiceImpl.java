@@ -74,7 +74,7 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     public List<BookDTO> getBooksByAuthorName(String name) {
-        List<Author> authors = authorRepository.findByNameIgnoreCase(name);
+        Optional<Author> authors = authorRepository.findByNameIgnoreCase(name);
 
         return authors.stream()
                 .flatMap(author -> author.getBooks().stream())

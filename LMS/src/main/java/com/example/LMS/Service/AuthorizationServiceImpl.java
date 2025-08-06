@@ -1,14 +1,13 @@
 package com.example.LMS.Service;
 
-import com.example.LMS.Configurations.SecurityBeansConfig;
+import com.example.LMS.Configurations.JwtService;
 import com.example.LMS.Repository.UsersRepository;
-import com.example.LMS.dto.LoginDTO;
-import com.example.LMS.dto.LoginRequestDTO;
-import com.example.LMS.dto.UserRegisterDTO;
-import com.example.LMS.dto.UserProfileDTO;
+import com.example.LMS.dto.*;
 import com.example.LMS.entity.Role;
 import com.example.LMS.entity.Users;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,16 +15,13 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthorizationServiceImpl implements AuthorizationService {
 
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public AuthorizationServiceImpl(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
-        this.usersRepository = usersRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     @Override
     public UserRegisterDTO register(UserRegisterDTO registrationDTO) {
@@ -38,7 +34,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         user.setEmail(registrationDTO.getEmail());
         user.setPhone(registrationDTO.getPhone());
         user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-
         user.setRole(Role.STUDENT); // default role
         user.setRegistrationDate(LocalDateTime.now());
 
@@ -48,25 +43,23 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         result.setName(savedUser.getName());
         result.setEmail(savedUser.getEmail());
         result.setPhone(savedUser.getPhone());
-        result.setPassword(null); // never return password
+        result.setPassword(null);
 
         return result;
     }
 
-
     @Override
-    public LoginRequestDTO login(LoginDTO dto) {
+    public JwtAuthResponse login(LoginDTO dto) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
+        );
+
         Users user = usersRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Incorrect password");
-        }
+        String jwt = jwtService.generateToken(user.getEmail(), user.getRole());
 
-        LoginRequestDTO res = new LoginRequestDTO();
-        res.setEmail(user.getEmail());
-        res.setPassword(null); // or replace with JWT token later
-        return res;
+        return new JwtAuthResponse(jwt);
     }
 
 
@@ -82,7 +75,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         if (userOpt.isPresent()) {
             Users user = userOpt.get();
 
-            if (!user.getPassword().equals(oldPassword)) {
+            if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
                 return false;
             }
 
@@ -105,7 +98,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
         if (userOpt.isPresent()) {
             Users user = userOpt.get();
-            user.setPassword(passwordEncoder.encode(newPassword)); // ✅ Encrypt
+            user.setPassword(passwordEncoder.encode(newPassword));
             usersRepository.save(user);
             return true;
         }
@@ -117,9 +110,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     public Role getUserRole(String email) {
         return usersRepository.findByEmail(email)
                 .map(Users::getRole)
-                .orElse(null); // Or throw a custom exception if user not found
+                .orElse(null);
     }
-
 
     @Override
     public boolean deleteUserByEmail(String email) {
@@ -142,5 +134,4 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                 user.getRole().name()
         );
     }
-
 }
